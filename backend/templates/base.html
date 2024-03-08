@@ -56,24 +56,34 @@
   <header id="header" class="fixed-top">
     <div class="container d-flex align-items-center">
 
-      <a href="index.html" class="logo me-auto"><img src="static/assets/img/logo.png" alt=""></a>
+      <a href="/" class="logo me-auto"><img src="static/assets/img/logo.png" alt=""></a>
       <!-- Uncomment below if you prefer to use an image logo -->
       <!-- <h1 class="logo me-auto"><a href="index.html">Medicio</a></h1> -->
 
       <nav id="navbar" class="navbar order-last order-lg-0">
         <ul>
           <li><a class="nav-link scrollto " href="/">Home</a></li>
-          <!-- <li><a class="nav-link scrollto" href="#about">Patien</a></li> -->
-          <!-- <li><a class="nav-link scrollto" href="#services">Services</a></li> -->
           <li><a class="nav-link scrollto" href="#departments">Patient Details</a></li>
           <li><a class="nav-link scrollto" href="#doctors">Available Beds</a></li>
-          <li class="dropdown"><a href="#"><span>Sign In</span> <i class="bi bi-chevron-down"></i></a>
+
+{% if current_user.is_authenticated %}
+
+          <li class="dropdown"><a href="#"><span>Hello User</span> <i class="bi bi-chevron-down"></i></a>
             <ul>
-              <li><a href="/userlogin">User Login</a></li>
-              <li><a href="/hospitallogin">Hospital Login</a></li>
-              <li><a href="/admin">Admin Login</a></li>
+              <li><a href="/settings">⚙️ Account Settings</a></li>
+              <li><a href="/logout">👤 Sign Out</a></li>
+              <!-- <li><a href="/admin">Admin Login</a></li> -->
             </ul>
           </li>
+{% else %}
+          <li class="dropdown"><a href="/login"><span>Sign In</span> <i class="bi bi-chevron-down"></i></a>
+            <ul>
+              <li><a href="/login">👤 User Login</a></li>
+              <li><a href="/hospitallogin">🏥 Hospital Login</a></li>
+              <li><a href="/admin">🧑🏻‍💻 Admin Login</a></li>
+            </ul>
+          </li>
+{% endif %}
           <li><a class="nav-link scrollto" href="#contact">Contact</a></li>
         </ul>
         <i class="bi bi-list mobile-nav-toggle"></i>

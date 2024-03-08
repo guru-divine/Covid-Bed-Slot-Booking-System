@@ -8,12 +8,13 @@
         <div class="col-md-4"></div>
         <div class="col-md-4">
 
-            <form action="" method="post">
+            <form action="/login" method="post">
+                {% include "message.html" %}
                 <div class="form-group">
                     <input type="text" class="form-control mt-2" placeholder="Enter SRF ID" name="srf" required>
                 </div>
                 <div class="form-group">
-                    <input type="date" class="form-control mt-2" placeholder="Enter your DOB" name="dob" required>
+                    <input type="password" class="form-control mt-2" placeholder="Enter your Password" name="pswd" required>
                 </div>
                 <br>
                 <button type="submit" class="btn btn-info" style="background-color: #3fbbc0; color: white";>Login</button>
@@ -23,7 +24,7 @@
             <div>
                 <br>
                 New User? 
-                <a class="text-success" href="/usersignup"> Sign Up</a>
+                <a class="text-success" href="/signup"> Sign Up</a>
             </div>
 
         </div>

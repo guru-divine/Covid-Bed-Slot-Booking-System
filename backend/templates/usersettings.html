@@ -1,0 +1,66 @@
+{% extends 'baselogin.html' %}
+{% block title%} Settings {% endblock title%}
+
+{% block form %}
+    <h2>Settings</h2>
+
+        <div class="row">
+            <div class="col-md-3"></div>
+            <div class="col-md-6">
+        
+                <form action="/settings" method="post">
+                    {% include "message.html" %}
+                    <div class="form-group row">
+                        <label class="col-md-4 col-form-label">SRFID:</label>
+                        <div class="col-md-8">
+                            <input type="text" class="form-control mt-2" value="{{current_user.srfid}}" readonly>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-md-4 col-form-label">Email:</label>
+                        <div class="col-md-8">
+                            <input type="text" class="form-control mt-2" value="{{current_user.email}}" readonly>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-md-4 col-form-label">DOB:</label>
+                        <div class="col-md-8">
+                            <input type="text" class="form-control mt-2" value="{{current_user.dob}}" readonly>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-md-4 col-form-label">Current Password:</label>
+                        <div class="col-md-8">
+                            <input type="password" class="form-control mt-2" placeholder="Current Password" name="oldPassword" required>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-md-4 col-form-label">New Password:</label>
+                        <div class="col-md-8">
+                            <input type="password" class="form-control mt-2" placeholder="New Password" name="newPassword" required>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-md-4 col-form-label">Re-enter New Password:</label>
+                        <div class="col-md-8">
+                            <input type="password" class="form-control mt-2" placeholder="Re-enter New Password" name="reNewPassword" required>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="form-group row">
+                        <div class="col-md-12 text-right">
+                            <button type="submit" class="btn btn-info" style="background-color: #3fbbc0; color: white;">Change Password</button>
+                        </div>
+                    </div>
+                </form>
+        
+            </div>
+            <div class="col-md-3"></div>
+        </div>
+        
+
+        
+    </div>
+
+    
+{% endblock form %}
