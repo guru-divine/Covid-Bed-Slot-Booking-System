@@ -1,8 +1,9 @@
-from flask import Flask, request, redirect, render_template, flash
+from flask import Flask, request, redirect, render_template, flash, session
 from flask.helpers import url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from flask_login import login_required, logout_user, login_user, login_manager, LoginManager, current_user
+import json
 # from werkzeug.security import generate_password_hash, check_password_hash
 
 #my database connection
@@ -18,6 +19,9 @@ login_manager.login_view = 'login'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:@localhost/covid'
 db = SQLAlchemy(app)
 
+with open('config.json', 'r') as c:
+    params = json.load(c)["params"]
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
@@ -29,6 +33,8 @@ class Test(db.Model):
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     srfid = db.Column(db.String(20), unique=True)
+    fname = db.Column(db.String(20))
+    lname = db.Column(db.String(20))
     email = db.Column(db.String(20))
     pswd = db.Column(db.String(20))
     dob = db.Column(db.Date)
@@ -42,6 +48,8 @@ def home():
 def signup():
     if request.method == "POST":
         srfid = request.form.get('srf')
+        fname = request.form.get('fname')
+        lname = request.form.get('lname')
         email = request.form.get('email')
         dob = request.form.get('dob')
         pswd = request.form.get('pswd')
@@ -50,11 +58,11 @@ def signup():
         if(user and user.srfid==srfid):
             flash("User already exists", "warning")
             return render_template("usersignup.html") 
-        print(srfid, email, dob, pswd)
-        new_user = User(srfid=srfid, email=email, dob=dob, pswd=pswd)
+        # print(srfid, fname, lname, email, dob, pswd)
+        new_user = User(srfid=srfid, fname=fname, lname=lname, email=email, dob=dob, pswd=pswd)
         db.session.add(new_user)
         db.session.commit()
-        return render_template()
+        return render_template("index.html")
     # flash("SignUp successful", "success")
     return render_template("usersignup.html")
 
@@ -76,6 +84,23 @@ def login():
             return render_template("userlogin.html") 
     
     return render_template("userlogin.html")
+
+@app.route('/admin', methods=['POST', 'GET'])
+def admin():
+    if request.method == "POST":
+        username = request.form.get('username')
+        password = request.form.get('password')
+
+        print(username, password)
+        if(username == params['username']  and password == params['password']):
+            # login_user(user)
+            session['user'] = username
+            return render_template("addHospitalUser.html")
+        else:
+            flash("Invalid Credentials", "danger")
+            return render_template("admin.html")
+    
+    return render_template("admin.html")
 
 
 @app.route('/logout')
