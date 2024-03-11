@@ -197,6 +197,23 @@ def addHospitalUser():
 
     # return render_template("addHospitalUser.html")
 
+@app.route('/hospitallogin', methods=['POST', 'GET'])
+def hospitallogin():
+    if request.method == "POST":
+        hcode = request.form.get('hcode')
+        email = request.form.get('email')
+        pswd = request.form.get('pswd')
+
+        user = Hospitaluser.query.filter_by(hcode=hcode).first()
+        if(user and user.email==email and user.pswd==pswd):
+            login_user(user)
+            return render_template("index.html")
+        else:
+            flash("Invalid Credentials", "danger")
+            return render_template("hospitallogin.html") 
+    
+    return render_template("hospitallogin.html")
+
 #testing whether db is connected
 @app.route("/test")
 def test():
