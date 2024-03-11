@@ -4,12 +4,25 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from flask_login import login_required, logout_user, login_user, login_manager, LoginManager, current_user
 import json
+from flask_mail import Mail, Message
 # from werkzeug.security import generate_password_hash, check_password_hash
 
 #my database connection
 local_server = True
 app = Flask(__name__)
 app.secret_key = "divyaraj"
+
+with open('config.json', 'r') as c:
+    params = json.load(c)["params"]
+
+app.config.update(
+    MAIL_SERVER = 'smtp.gmail.com',
+    MAIL_PORT = '465',
+    MAIL_USE_SSL = True,
+    MAIL_USERNAME = params['gmail-user'],
+    MAIL_PASSWORD = params['gmail-pswd']
+)
+mail = Mail(app)
 
 # this is for getting the unique user access
 login_manager = LoginManager(app)
@@ -19,8 +32,6 @@ login_manager.login_view = 'login'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:@localhost/covid'
 db = SQLAlchemy(app)
 
-with open('config.json', 'r') as c:
-    params = json.load(c)["params"]
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -38,6 +49,14 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(20))
     pswd = db.Column(db.String(20))
     dob = db.Column(db.Date)
+
+class Hospitaluser(UserMixin, db.Model):
+    hid = db.Column(db.Integer, primary_key=True)
+    hcode = db.Column(db.String(20), unique=True)
+    hname = db.Column(db.String(100))
+    hlink = db.Column(db.String(100))
+    email = db.Column(db.String(20))
+    pswd = db.Column(db.String(20))
 
 @app.route("/")
 def home():
@@ -102,6 +121,12 @@ def admin():
     
     return render_template("admin.html")
 
+@app.route('/logoutadmin')
+def logoutadmin():
+    session.pop('user')
+    flash("Logout Successful", "success")
+    return redirect('/admin')
+
 
 @app.route('/logout')
 @login_required
@@ -128,6 +153,49 @@ def settings():
             return render_template("usersettings.html")
         
     return render_template("usersettings.html")
+
+
+@app.route('/addHospitalUser', methods=['POST', 'GET'])
+def addHospitalUser():
+    if('user' in session and session['user'] == params['username']):
+        if request.method == "POST":
+            hname = request.form.get('hname')
+            hcode = request.form.get('hcode')
+            hlink = request.form.get('hlink')
+            email = request.form.get('email')
+            pswd = request.form.get('pswd')
+            print(hname, hcode, hlink, email, pswd)
+            user = Hospitaluser.query.filter_by(hcode=hcode).first()
+            if(user and user.hcode == hcode):
+                flash("User already exists", "warning")
+                return render_template("addHospitalUser.html")
+            new_user = Hospitaluser(hname=hname, hcode=hcode, hlink=hlink, email=email, pswd=pswd)
+            db.session.add(new_user)
+            db.session.commit()
+
+            msg = Message('COVID CARE CENTER',
+                sender=params['gmail-user'],
+                recipients=[email],
+                body=f"Thanks for Joining Us.\n\n\n"
+                     f"Your Login Credentials are: \n\n"
+                     f"\tUsername: {hcode}\n"
+                     f"\tEmail: {email}\n"
+                     f"\tPassword: {pswd}\n\n"
+                     f"Do not share these credentials with anyone. \n"
+                     f"This is auto-generated email. Please do not reply"
+                  )
+            mail.send(msg)
+
+            flash("Hospital Added", "info")
+            return render_template("addHospitalUser.html")
+            # pass
+
+        return render_template("addHospitalUser.html")
+    else:
+        flash("Login and Try Again", "warning")
+        return redirect('/admin')
+
+    # return render_template("addHospitalUser.html")
 
 #testing whether db is connected
 @app.route("/test")
