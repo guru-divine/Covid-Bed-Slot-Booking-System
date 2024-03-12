@@ -67,10 +67,21 @@
           <li><a class="nav-link scrollto" href="#doctors">Available Beds</a></li>
 
 {% if current_user.is_authenticated %}
+          {% if current_user.srfid %}
+            <li class="dropdown"><a href="#"><span>Hello User</span> <i class="bi bi-chevron-down"></i></a>
+          {% elif current_user.hcode %}
+            <li class="dropdown"><a href="#"><span>Hello Hospital</span> <i class="bi bi-chevron-down"></i></a>
+          {% else %}
+            <li class="dropdown"><a href="#"><span>Hello Admin</span> <i class="bi bi-chevron-down"></i></a>
+          {% endif %}
 
-          <li class="dropdown"><a href="#"><span>Hello User</span> <i class="bi bi-chevron-down"></i></a>
             <ul>
-              <li><a href="/settings">⚙️ Account Settings</a></li>
+              {% if current_user.srfid %}
+                <li><a href="/settings">⚙️ Account Settings</a></li>
+              {% elif current_user.hcode %}
+                <li><a href="#">⚙️ Hospital Info</a></li>
+              {% endif %}
+              <!-- <li><a href="/settings">⚙️ Account Settings</a></li> -->
               <li><a href="/logout">👤 Sign Out</a></li>
               <!-- <li><a href="/admin">Admin Login</a></li> -->
             </ul>

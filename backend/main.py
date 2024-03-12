@@ -1,4 +1,4 @@
-from flask import Flask, request, redirect, render_template, flash, session
+from flask import Flask, request, redirect, render_template, flash, session, render_template_string
 from flask.helpers import url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
@@ -51,12 +51,13 @@ class User(UserMixin, db.Model):
     dob = db.Column(db.Date)
 
 class Hospitaluser(UserMixin, db.Model):
-    hid = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     hcode = db.Column(db.String(20), unique=True)
     hname = db.Column(db.String(100))
     hlink = db.Column(db.String(100))
     email = db.Column(db.String(20))
     pswd = db.Column(db.String(20))
+    authorised = db.Column(db.Integer)
 
 @app.route("/")
 def home():
@@ -127,6 +128,7 @@ def logoutadmin():
     flash("Logout Successful", "success")
     return redirect('/admin')
 
+# has_srfid = hasattr(current_user, 'srfid')
 
 @app.route('/logout')
 @login_required
@@ -169,7 +171,7 @@ def addHospitalUser():
             if(user and user.hcode == hcode):
                 flash("User already exists", "warning")
                 return render_template("addHospitalUser.html")
-            new_user = Hospitaluser(hname=hname, hcode=hcode, hlink=hlink, email=email, pswd=pswd)
+            new_user = Hospitaluser(hname=hname, hcode=hcode, hlink=hlink, email=email, pswd=pswd, authorised=1)
             db.session.add(new_user)
             db.session.commit()
 
@@ -206,13 +208,43 @@ def hospitallogin():
 
         user = Hospitaluser.query.filter_by(hcode=hcode).first()
         if(user and user.email==email and user.pswd==pswd):
-            login_user(user)
-            return render_template("index.html")
+            if(user.authorised==1):
+                login_user(user)
+                return render_template("index.html")
+            else:
+                flash("Please wait for the Admin to approve", "danger")
+                return render_template("hospitallogin.html")
         else:
             flash("Invalid Credentials", "danger")
             return render_template("hospitallogin.html") 
     
     return render_template("hospitallogin.html")
+
+@app.route('/hospitalapply', methods=["POST", "GET"])
+def hospitalapply():
+    if request.method == "POST":
+        hname = request.form.get('hname')
+        hcode = request.form.get('hcode')
+        hlink = request.form.get('hlink')
+        email = request.form.get('email')
+        pswd = request.form.get('pswd')
+        user = Hospitaluser.query.filter_by(hcode=hcode).first()
+        if(user and user.hcode==hcode):
+            flash("Hospital already exists!", "danger")
+            return render_template("hospitalapply.html")
+        else:
+            new_user = Hospitaluser(hname=hname, hcode=hcode, hlink=hlink, email=email, pswd=pswd, authorised=0)
+            db.session.add(new_user)
+            db.session.commit()
+            return render_template_string("""
+                <script>
+                    setTimeout(function() {
+                        window.location.href = '/';
+                    }, 5000);
+                </script>
+                """)
+        
+    return render_template("hospitalapply.html")
 
 #testing whether db is connected
 @app.route("/test")

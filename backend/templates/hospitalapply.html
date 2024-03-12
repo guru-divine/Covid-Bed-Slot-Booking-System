@@ -1,16 +1,14 @@
 {% extends 'baselogin.html' %}
-{% block title %} Hospital User Signup {% endblock title %}
+{% block title %} Hospital Application Form {% endblock title %}
 
 {% block form %}
-    <h2>Add Hospital</h2>
-
+    <h2>Hospital Application Form</h2>
+    
     <div class="row">
-        <div class="col-md-4">
-            <a href="/logoutadmin" class="btn btn-danger">Logout</a>
-        </div>
+        <div class="col-md-4"></div>
         <div class="col-md-4">
 
-            <form action="/addHospitalUser" method="post">
+            <form action="/hospitalapply" method="post">
                 {% include "message.html" %}
                 <div class="form-group">
                     <input type="text" class="form-control mt-2" placeholder="Hospital Name" name="hname" required>
@@ -28,9 +26,13 @@
                     <input type="password" class="form-control mt-2" placeholder="Enter your Password" name="pswd" required>
                 </div>
                 <br>
-                <button type="submit" class="btn btn-info" style="background-color: #3fbbc0; color: white">Add</button>
+                <button type="submit" class="btn btn-info" style="background-color: #3fbbc0; color: white">Apply</button>
             </form>
-            {% comment %} {% for %} {% endcomment %}
+            <div>
+                <br>
+                Already a member? 
+                <a class="text-success" href="/hospitallogin"> Login</a>
+            </div>
         </div>
         <div class="col-md-4"></div>
     </div>

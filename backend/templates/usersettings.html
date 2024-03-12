@@ -9,6 +9,16 @@
         
                 <form action="/settings" method="post">
                     {% include "message.html" %}
+
+                    {% if current_user.hcode %}
+                        <div class="form-group row">
+                            <label class="col-md-4 col-form-label">HCode:</label>
+                            <div class="col-md-8">
+                                <input type="text" class="form-control mt-2" value="{{current_user.hcode}}" readonly>
+                            </div>
+                        </div>
+                    {% endif %}
+                    
                     <div class="form-group row">
                         <label class="col-md-4 col-form-label">SRFID:</label>
                         <div class="col-md-8">
