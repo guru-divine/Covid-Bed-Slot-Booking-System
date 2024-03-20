@@ -59,6 +59,12 @@ class Hospitaluser(UserMixin, db.Model):
     pswd = db.Column(db.String(20))
     authorised = db.Column(db.Integer)
 
+class Hospitaldetails(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    hcode = db.Column(db.String(20), unique=True)
+    nbed = db.Column(db.Integer)
+    icubed = db.Column(db.Integer)
+
 @app.route("/")
 def home():
     return render_template("index.html")
@@ -83,7 +89,6 @@ def signup():
         db.session.add(new_user)
         db.session.commit()
         return render_template("index.html")
-    # flash("SignUp successful", "success")
     return render_template("usersignup.html")
 
 @app.route('/login', methods=['POST', 'GET'])
@@ -93,12 +98,10 @@ def login():
         pswd = request.form.get('pswd')
 
         user = User.query.filter_by(srfid=srfid).first()
-        print(user)
-        # return render_template("index.html")
         if(user and user.pswd==pswd):
-            login_user(user)
-            # flash("Login Successful", "success")
-            return render_template("index.html")
+            session['user'] = srfid
+            session['role'] = 'u'
+            return redirect(url_for('home'))
         else:
             flash("Invalid Credentials", "danger")
             return render_template("userlogin.html") 
@@ -113,9 +116,8 @@ def admin():
 
         print(username, password)
         if(username == params['username']  and password == params['password']):
-            # login_user(user)
-            session['user'] = username
-            return render_template("addHospitalUser.html")
+            session['admin'] = username
+            return redirect(url_for('addHospitalUser'))
         else:
             flash("Invalid Credentials", "danger")
             return render_template("admin.html")
@@ -124,21 +126,22 @@ def admin():
 
 @app.route('/logoutadmin')
 def logoutadmin():
-    session.pop('user')
+    session.pop('admin')
     flash("Logout Successful", "success")
     return redirect('/admin')
 
-# has_srfid = hasattr(current_user, 'srfid')
 
 @app.route('/logout')
-@login_required
 def logout():
-    logout_user()
+    session.pop('user')
+    session.pop('role')
     flash("Logout Successful", "success")
     return redirect(url_for('login'))
 
 @app.route('/settings', methods=['POST', 'GET'])
 def settings():
+    cur_user = User.query.filter_by(srfid=session['user']).first()
+    # cur_user = User.query.first(session['user']) 
     if request.method == "POST":
         oldPassword = request.form.get('oldPassword')
         newPassword = request.form.get('newPassword')
@@ -154,12 +157,12 @@ def settings():
                 flash("Password didn't match. Try again!", "alert")
             return render_template("usersettings.html")
         
-    return render_template("usersettings.html")
+    return render_template("usersettings.html", cur_user=cur_user)
 
 
 @app.route('/addHospitalUser', methods=['POST', 'GET'])
 def addHospitalUser():
-    if('user' in session and session['user'] == params['username']):
+    if('admin' in session and session['admin'] == params['username']):
         if request.method == "POST":
             hname = request.form.get('hname')
             hcode = request.form.get('hcode')
@@ -206,19 +209,30 @@ def hospitallogin():
         email = request.form.get('email')
         pswd = request.form.get('pswd')
 
-        user = Hospitaluser.query.filter_by(hcode=hcode).first()
-        if(user and user.email==email and user.pswd==pswd):
-            if(user.authorised==1):
-                login_user(user)
-                return render_template("index.html")
+        hospital = Hospitaluser.query.filter_by(hcode=hcode, email=email, pswd=pswd).first()
+        if hospital:
+            if hospital.authorised == 1:
+                login_user(hospital)
+               
+
+                session['hospital'] = hcode
+                session['role'] = 'h'
+                return redirect('/hospitaldetails')
             else:
                 flash("Please wait for the Admin to approve", "danger")
                 return render_template("hospitallogin.html")
         else:
             flash("Invalid Credentials", "danger")
-            return render_template("hospitallogin.html") 
-    
+            return render_template("hospitallogin.html")
+
     return render_template("hospitallogin.html")
+
+@app.route('/logouthospital')
+def logouthospital():
+    session.pop('hospital')
+    session.pop('role')
+    flash("Logout Successful", "success")
+    return redirect('/hospitallogin')
 
 @app.route('/hospitalapply', methods=["POST", "GET"])
 def hospitalapply():
@@ -246,6 +260,14 @@ def hospitalapply():
         
     return render_template("hospitalapply.html")
 
+@app.route("/hospitaldetails", methods=["POST", "GET"])
+def hospitaldetails():
+    if 'hospital' in session:
+        return render_template("hospitaldetails.html")
+    else:
+        flash("Login and Try Again", "warning")
+        return redirect('/hospitallogin')
+    
 #testing whether db is connected
 @app.route("/test")
 def test():

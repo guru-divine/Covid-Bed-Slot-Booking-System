@@ -66,19 +66,19 @@
           <li><a class="nav-link scrollto" href="#departments">Patient Details</a></li>
           <li><a class="nav-link scrollto" href="#doctors">Available Beds</a></li>
 
-{% if current_user.is_authenticated %}
-          {% if current_user.srfid %}
+{% if 'role' in session %}
+          {% if session['role'] == 'u' %}
             <li class="dropdown"><a href="#"><span>Hello User</span> <i class="bi bi-chevron-down"></i></a>
-          {% elif current_user.hcode %}
+          {% elif session['role'] == 'h' %}
             <li class="dropdown"><a href="#"><span>Hello Hospital</span> <i class="bi bi-chevron-down"></i></a>
           {% else %}
             <li class="dropdown"><a href="#"><span>Hello Admin</span> <i class="bi bi-chevron-down"></i></a>
           {% endif %}
 
             <ul>
-              {% if current_user.srfid %}
+              {% if session['role'] == 'u' %}
                 <li><a href="/settings">⚙️ Account Settings</a></li>
-              {% elif current_user.hcode %}
+              {% elif session['role'] == 'h' %}
                 <li><a href="#">⚙️ Hospital Info</a></li>
               {% endif %}
               <!-- <li><a href="/settings">⚙️ Account Settings</a></li> -->

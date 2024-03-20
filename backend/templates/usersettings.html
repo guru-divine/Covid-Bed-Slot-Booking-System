@@ -9,12 +9,12 @@
         
                 <form action="/settings" method="post">
                     {% include "message.html" %}
-
-                    {% if current_user.hcode %}
+                    
+                    {% if cur_user.hcode %}
                         <div class="form-group row">
                             <label class="col-md-4 col-form-label">HCode:</label>
                             <div class="col-md-8">
-                                <input type="text" class="form-control mt-2" value="{{current_user.hcode}}" readonly>
+                                <input type="text" class="form-control mt-2" value="{{cur_user.hcode}}" readonly>
                             </div>
                         </div>
                     {% endif %}
@@ -22,25 +22,25 @@
                     <div class="form-group row">
                         <label class="col-md-4 col-form-label">SRFID:</label>
                         <div class="col-md-8">
-                            <input type="text" class="form-control mt-2" value="{{current_user.srfid}}" readonly>
+                            <input type="text" class="form-control mt-2" value="{{cur_user.srfid}}" readonly>
                         </div>
                     </div>
                     <div class="form-group row">
                         <label class="col-md-4 col-form-label">Name:</label>
                         <div class="col-md-8">
-                            <input type="text" class="form-control mt-2" value="{{current_user.fname}} {{current_user.lname}}" readonly>
+                            <input type="text" class="form-control mt-2" value="{{cur_user.fname}} {{cur_user.lname}}" readonly>
                         </div>
                     </div>
                     <div class="form-group row">
                         <label class="col-md-4 col-form-label">Email:</label>
                         <div class="col-md-8">
-                            <input type="text" class="form-control mt-2" value="{{current_user.email}}" readonly>
+                            <input type="text" class="form-control mt-2" value="{{cur_user.email}}" readonly>
                         </div>
                     </div>
                     <div class="form-group row">
                         <label class="col-md-4 col-form-label">DOB:</label>
                         <div class="col-md-8">
-                            <input type="text" class="form-control mt-2" value="{{current_user.dob}}" readonly>
+                            <input type="text" class="form-control mt-2" value="{{cur_user.dob}}" readonly>
                         </div>
                     </div>
                     <div class="form-group row">
