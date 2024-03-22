@@ -71,18 +71,22 @@
             <li class="dropdown"><a href="#"><span>Hello User</span> <i class="bi bi-chevron-down"></i></a>
           {% elif session['role'] == 'h' %}
             <li class="dropdown"><a href="#"><span>Hello Hospital</span> <i class="bi bi-chevron-down"></i></a>
-          {% else %}
+          {% elif session['role'] == 'a' %}
             <li class="dropdown"><a href="#"><span>Hello Admin</span> <i class="bi bi-chevron-down"></i></a>
           {% endif %}
 
             <ul>
               {% if session['role'] == 'u' %}
                 <li><a href="/settings">⚙️ Account Settings</a></li>
+                <li><a href="/logout">👤 Sign Out</a></li>
               {% elif session['role'] == 'h' %}
-                <li><a href="#">⚙️ Hospital Info</a></li>
+                <li><a href="/hospitaldetails">⚙️ Hospital Info</a></li>
+                <li><a href="/logouthospital">👤 Sign Out</a></li>
+              {% elif session['role'] == 'a'%}
+              <li><a href="/hospitaldetails">⚙️ Admin Info</a></li>
+              <li><a href="/logouthospital">👤 Sign Out</a></li>
               {% endif %}
               <!-- <li><a href="/settings">⚙️ Account Settings</a></li> -->
-              <li><a href="/logout">👤 Sign Out</a></li>
               <!-- <li><a href="/admin">Admin Login</a></li> -->
             </ul>
           </li>
@@ -221,7 +225,7 @@
 
     <div class="container">
       <div class="copyright">
-        &copy; Copyright <strong><span>Divine Service Center</span></strong>. All Rights Reserved
+        &copy; Copyright <strong><span>Divine Care Center</span></strong>. All Rights Reserved
       </div>
       <div class="credits">
         Designed by <a href="https://github.com/guru-divine" target="_blank">Divya Raj</a>

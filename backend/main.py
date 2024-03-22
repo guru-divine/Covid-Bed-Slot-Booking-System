@@ -59,11 +59,12 @@ class Hospitaluser(UserMixin, db.Model):
     pswd = db.Column(db.String(20))
     authorised = db.Column(db.Integer)
 
-class Hospitaldetails(UserMixin, db.Model):
+class Hospitaldata(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     hcode = db.Column(db.String(20), unique=True)
-    nbed = db.Column(db.Integer)
+    normalbed = db.Column(db.Integer)
     icubed = db.Column(db.Integer)
+    ventbed = db.Column(db.Integer)
 
 @app.route("/")
 def home():
@@ -117,6 +118,7 @@ def admin():
         print(username, password)
         if(username == params['username']  and password == params['password']):
             session['admin'] = username
+            session['role'] = 'a'
             return redirect(url_for('addHospitalUser'))
         else:
             flash("Invalid Credentials", "danger")
@@ -127,6 +129,7 @@ def admin():
 @app.route('/logoutadmin')
 def logoutadmin():
     session.pop('admin')
+    session.pop('role')
     flash("Logout Successful", "success")
     return redirect('/admin')
 
@@ -140,6 +143,9 @@ def logout():
 
 @app.route('/settings', methods=['POST', 'GET'])
 def settings():
+    if 'user' not in session:
+        flash("Login first!", "danger")
+        return redirect('/login')
     cur_user = User.query.filter_by(srfid=session['user']).first()
     # cur_user = User.query.first(session['user']) 
     if request.method == "POST":
@@ -159,6 +165,22 @@ def settings():
         
     return render_template("usersettings.html", cur_user=cur_user)
 
+# Define a function to send email within the application context
+def send_email(user):
+    with app.app_context():
+        msg = Message('DIVINE CARE CENTER',
+                      sender=params['gmail-user'],
+                      recipients=[user.email],
+                      body=f"Thanks for Joining Us.\n\n\n"
+                           f"Your Login Credentials are: \n\n"
+                           f"\tUsername: {user.hcode}\n"
+                           f"\tEmail: {user.email}\n"
+                           f"\tPassword: {user.pswd}\n\n"
+                           f"Do not share these credentials with anyone. \n\n\n"
+                           f"You are kindly requested to update the information of your hospital at your earliest convenience. This will greatly facilitate the smooth functioning and efficient operation of our systems. Thank you for your cooperation.\n\n"
+                           f"This is auto-generated email. Please do not reply."
+                    )
+        mail.send(msg)
 
 @app.route('/addHospitalUser', methods=['POST', 'GET'])
 def addHospitalUser():
@@ -178,29 +200,17 @@ def addHospitalUser():
             db.session.add(new_user)
             db.session.commit()
 
-            msg = Message('COVID CARE CENTER',
-                sender=params['gmail-user'],
-                recipients=[email],
-                body=f"Thanks for Joining Us.\n\n\n"
-                     f"Your Login Credentials are: \n\n"
-                     f"\tUsername: {hcode}\n"
-                     f"\tEmail: {email}\n"
-                     f"\tPassword: {pswd}\n\n"
-                     f"Do not share these credentials with anyone. \n"
-                     f"This is auto-generated email. Please do not reply"
-                  )
-            mail.send(msg)
+            send_email(new_user)
 
             flash("Hospital Added", "info")
             return render_template("addHospitalUser.html")
-            # pass
 
         return render_template("addHospitalUser.html")
     else:
         flash("Login and Try Again", "warning")
         return redirect('/admin')
 
-    # return render_template("addHospitalUser.html")
+    return render_template("addHospitalUser.html")
 
 @app.route('/hospitallogin', methods=['POST', 'GET'])
 def hospitallogin():
@@ -212,12 +222,10 @@ def hospitallogin():
         hospital = Hospitaluser.query.filter_by(hcode=hcode, email=email, pswd=pswd).first()
         if hospital:
             if hospital.authorised == 1:
-                login_user(hospital)
-               
-
+                # login_user(hospital)
                 session['hospital'] = hcode
                 session['role'] = 'h'
-                return redirect('/hospitaldetails')
+                return redirect('/')
             else:
                 flash("Please wait for the Admin to approve", "danger")
                 return render_template("hospitallogin.html")
@@ -263,10 +271,31 @@ def hospitalapply():
 @app.route("/hospitaldetails", methods=["POST", "GET"])
 def hospitaldetails():
     if 'hospital' in session:
-        return render_template("hospitaldetails.html")
+        hospital_user = Hospitaluser.query.filter_by(hcode=session['hospital']).first()
+        hospital_data = Hospitaldata.query.filter_by(hcode=session['hospital']).first()
+        return render_template("hospitaldetails.html", hospital_user=hospital_user, hospital_data = hospital_data)
     else:
         flash("Login and Try Again", "warning")
         return redirect('/hospitallogin')
+    
+@app.route('/updatehospitalinfo', methods=["POST", "GET"])
+def updatehospitalinfo():
+    if 'hospital' not in session:
+        flash("Login first!", "danger")
+        return redirect('/hospitallogin')
+    cur_user = Hospitaldata.query.filter_by(hcode=session['hospital']).first()
+    if request.method == "POST":
+        normalbed = request.form.get('normalbed')
+        icubed = request.form.get('icubed')
+        ventbed = request.form.get('ventbed')
+
+        user = Hospitaldata.query.get(cur_user.id)
+        user.normalbed = normalbed
+        user.icubed = icubed
+        user.ventbed = ventbed
+        db.session.commit()
+        return redirect('/hospitaldetails')
+
     
 #testing whether db is connected
 @app.route("/test")

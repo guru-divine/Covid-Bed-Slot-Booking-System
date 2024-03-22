@@ -66,23 +66,25 @@
           <li><a class="nav-link scrollto" href="#departments">Patient Details</a></li>
           <li><a class="nav-link scrollto" href="#doctors">Available Beds</a></li>
 
-{% if current_user.is_authenticated %}
-          {% if current_user.srfid %}
+{% if 'role' in session %}
+          {% if session['role'] == 'u' %}
             <li class="dropdown"><a href="#"><span>Hello User</span> <i class="bi bi-chevron-down"></i></a>
-          {% elif current_user.hcode %}
-            <li class="dropdown"><a href="#"><span>Hello Hospital</span> <i class="bi bi-chevron-down"></i></a>
+          {% elif session['role'] == 'h' %}
+            <li class="dropdown"><a href="/hospitaldetails"><span>Hello Hospital</span> <i class="bi bi-chevron-down"></i></a>
           {% else %}
             <li class="dropdown"><a href="#"><span>Hello Admin</span> <i class="bi bi-chevron-down"></i></a>
           {% endif %}
 
             <ul>
-              {% if current_user.srfid %}
+              {% if session['role'] == 'u' %}
                 <li><a href="/settings">⚙️ Account Settings</a></li>
-              {% elif current_user.hcode %}
-                <li><a href="#">⚙️ Hospital Info</a></li>
+                <li><a href="/logout">👤 Sign Out</a></li>
+              {% elif session['role'] == 'h' %}
+                <li><a href="/hospitaldetails">⚙️ Hospital Info</a></li>
+                <li><a href="/logouthospital">👤 Sign Out</a></li>
               {% endif %}
               <!-- <li><a href="/settings">⚙️ Account Settings</a></li> -->
-              <li><a href="/logout">👤 Sign Out</a></li>
+              
               <!-- <li><a href="/admin">Admin Login</a></li> -->
             </ul>
           </li>
@@ -105,50 +107,122 @@
     </div>
   </header><!-- End Header -->
 
-  <br><br><br><br><br><br><br>
-  <div class="row">
-    <div class="col">
-        <form class="form-inline" action="/hospitaldetails">
-            <div class="row">
-                <div class="col">
-                    <div class="form-group mb-2">
-                        <label for="staticEmail1" class="sr-only">Email</label>
-                        <input type="text" readonly class="form-control-plaintext" id="staticEmail1" value="email@example.com">
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="form-group mx-sm-3 mb-2">
-                        <label for="inputPassword1" class="sr-only">Password</label>
-                        <input type="password" class="form-control" id="inputPassword1" placeholder="Password">
-                    </div>
-                </div>
-            </div>
-            <button type="submit" class="btn btn-primary mb-2">Confirm identity</button>
-        </form>
+  <br><br><br><br><br><br>
+  <div class="row row-eq-height container-fluid">
+    <div style="text-align: center; color: #3fbbc0; margin-bottom: 1rem;">
+      <h1>{{hospital_user.hname}}</h1>
     </div>
-    <div class="col" style="color: red;">
-        <form class="form-inline" style="color: red;">
-            <div class="row">
-                <div class="col">
-                    <div class="form-group mb-2">
-                        <label for="staticEmail2" class="sr-only">Email</label>
-                        <input type="text" readonly class="form-control-plaintext" id="staticEmail2" value="email@example.com">
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="form-group mx-sm-3 mb-2">
-                        <label for="inputPassword2" class="sr-only">Password</label>
-                        <input type="password" class="form-control" id="inputPassword2" placeholder="Password">
-                    </div>
-                </div>
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-body bg-light" style="height: 20rem;">
+          <form action="/updatehospitalinfo" method="POST">
+
+            <!-- Hospital Code -->
+            <div class="form-group row">
+              <label class="col-md-4 col-form-label">Hospital Code:</label>
+              <div class="col-md-8">
+                  <input type="text" class="form-control mt-2" value="{{session['hospital']}}" readonly>
+              </div>
             </div>
-            <!--<button type="submit" class="btn btn-primary mb-2">Confirm identity</button>-->
-        </form>
+
+            <!-- Hospital Name -->
+            <div class="form-group row">
+              <label class="col-md-4 col-form-label">Hospital Name:</label>
+              <div class="col-md-8">
+                  <input type="text" class="form-control mt-2" value="{{hospital_user.hname}}" readonly>
+              </div>
+            </div>
+
+            <!-- Normal Beds -->
+            <div class="form-group row">
+              <label class="col-md-4 col-form-label">Normal Beds:</label>
+              <div class="col-md-8">
+                  <input type="text" class="form-control mt-2" name = "normalbed" required>
+              </div>
+            </div>
+            
+            <!-- ICU Beds -->
+            <div class="form-group row">
+              <label class="col-md-4 col-form-label">ICU Beds:</label>
+              <div class="col-md-8">
+                  <input type="text" class="form-control mt-2" name = "icubed" required>
+              </div>
+            </div>
+            
+            <!-- Ventilator Beds -->
+            <div class="form-group row">
+              <label class="col-md-4 col-form-label">Ventilator Beds:</label>
+              <div class="col-md-8">
+                  <input type="text" class="form-control mt-2" name = "ventbed" required>
+              </div>
+            </div>
+            
+            <!--Submit Button-->
+            <br>
+            <div class="form-group row text-center">
+              <div class="col-md-12">
+                  <button class="btn btn-info" type="submit">Update</button>
+              </div>
+          </div>
+          </form>
+        </div>
+      </div>
     </div>
-</div>
+
+    <!--Column 2: Previous data saved-->
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-body bg-light" style="height: 20rem;">
+          <form action="/addhospitalinfo" method="POST">
+
+            <!-- Hospital Code -->
+            <div class="form-group row">
+              <label class="col-md-4 col-form-label">Hospital Code:</label>
+              <div class="col-md-8">
+                  <input type="text" style="color: gray; font-weight: bold;" class="form-control mt-2" value="{{session['hospital']}}" readonly>
+              </div>
+            </div>
+
+            <!-- Hospital Name -->
+            <div class="form-group row">
+              <label class="col-md-4 col-form-label">Hospital Name:</label>
+              <div class="col-md-8">
+                  <input type="text" style="color: gray; font-weight: bold;" class="form-control mt-2" value="{{hospital_user.hname}}" readonly>
+              </div>
+            </div>
+
+            <!-- Normal Beds -->
+            <div class="form-group row">
+              <label class="col-md-4 col-form-label">Normal Beds Available:</label>
+              <div class="col-md-8">
+                  <input type="text" style="color: gray; font-weight: bold;" class="form-control mt-2" value="{{hospital_data.normalbed}}" readonly>
+              </div>
+            </div>
+            
+            <!-- ICU Beds -->
+            <div class="form-group row">
+              <label class="col-md-4 col-form-label">ICU Beds Available:</label>
+              <div class="col-md-8">
+                  <input type="text" style="color: gray; font-weight: bold;" class="form-control mt-2" value="{{hospital_data.icubed}}" readonly>
+              </div>
+            </div>
+            
+            <!-- Ventilator Beds -->
+            <div class="form-group row">
+              <label class="col-md-4 col-form-label">Ventilator Beds Available:</label>
+              <div class="col-md-8">
+                  <input type="text" style="color: gray; font-weight: bold;" class="form-control mt-2" value="{{hospital_data.ventbed}}" readonly>
+              </div>
+            </div>
+            
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
 
 
-
+<!--height: 20rem-->
   
 
 </body>
