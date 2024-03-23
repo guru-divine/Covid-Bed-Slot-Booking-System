@@ -2,37 +2,59 @@
 {% block title %} Hospital User Signup {% endblock title %}
 
 {% block form %}
+
     <h2>Add Hospital</h2>
 
+    <div class="container" style="height: 300px; overflow: auto;">
     <div class="row">
-        <div class="col-md-4">
-            <a href="/logoutadmin" class="btn btn-danger">Logout</a>
-        </div>
-        <div class="col-md-4">
-
-            <form action="/addHospitalUser" method="post">
-                {% include "message.html" %}
-                <div class="form-group">
-                    <input type="text" class="form-control mt-2" placeholder="Hospital Name" name="hname" required>
+        {% for user in unauthorised_users %}
+            {% if loop.index % 3 == 1 %}
+                </div><div class="row"> <!-- Close and open a new row for every three users -->
+            {% endif %}
+            <div class="col-md-4">
+                <div class="user-container mb-4 border border-primary p-3" id="user-{{ user.id }}">
+                    <div class="form-group row">
+                        <label class="col-md-4 col-form-label align-self-center">Code:</label>
+                        <div class="col-md-8">
+                            <input type="text" class="form-control mt-2" value="{{user.hcode}}" readonly>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-md-4 col-form-label align-self-center">Name:</label>
+                        <div class="col-md-8">
+                            <input type="text" class="form-control mt-2" value="{{user.hname}}" readonly>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-md-4 col-form-label align-self-center">Website:</label>
+                        <div class="col-md-8">
+                            <input type="text" class="form-control mt-2" value="{{user.hlink}}" readonly>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-md-4 col-form-label align-self-center">Email:</label>
+                        <div class="col-md-8">
+                            <input type="text" class="form-control mt-2" value="{{user.email}}" readonly>
+                        </div>
+                    </div>
+                    <form action="/addHospitalUser" method="post">
+                        <input type="hidden" name="hid" value="{{user.id}}">
+                        <button type="submit" class="btn btn-success add-button mt-3" style="background-color: #3fbbc0; border: none;">ADD</button>
+                    </form>
                 </div>
-                <div class="form-group">
-                    <input type="text" class="form-control mt-2" placeholder="Hospital Code" name="hcode" required>
-                </div>
-                <div class="form-group">
-                    <input type="text" class="form-control mt-2" placeholder="Hospital URL" name="hlink" required>
-                </div>
-                <div class="form-group">
-                    <input type="email" class="form-control mt-2" placeholder="Enter email address" name="email" required>
-                </div>
-                <div class="form-group">
-                    <input type="password" class="form-control mt-2" placeholder="Enter your Password" name="pswd" required>
-                </div>
-                <br>
-                <button type="submit" class="btn btn-info" style="background-color: #3fbbc0; color: white">Add</button>
-            </form>
-        </div>
-        <div class="col-md-4"></div>
+            </div>
+        {% endfor %}
     </div>
+</div>
+
+    <!--<script>
+        document.querySelectorAll('.add-button').forEach(button => {
+            button.addEventListener('click', () => {
+                const containerId = button.closest('.user-container').id;
+                document.getElementById(containerId).remove();
+            });
+        });
+    </script>-->
 
     
 {% endblock form %}

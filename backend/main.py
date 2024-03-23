@@ -185,32 +185,33 @@ def send_email(user):
 @app.route('/addHospitalUser', methods=['POST', 'GET'])
 def addHospitalUser():
     if('admin' in session and session['admin'] == params['username']):
-        if request.method == "POST":
-            hname = request.form.get('hname')
-            hcode = request.form.get('hcode')
-            hlink = request.form.get('hlink')
-            email = request.form.get('email')
-            pswd = request.form.get('pswd')
-            print(hname, hcode, hlink, email, pswd)
-            user = Hospitaluser.query.filter_by(hcode=hcode).first()
-            if(user and user.hcode == hcode):
-                flash("User already exists", "warning")
-                return render_template("addHospitalUser.html")
-            new_user = Hospitaluser(hname=hname, hcode=hcode, hlink=hlink, email=email, pswd=pswd, authorised=1)
-            db.session.add(new_user)
-            db.session.commit()
+        unauthorised_users = Hospitaluser.query.filter_by(authorised=0).all()
+        if request.method == 'POST':
+            user_id = request.form.get('hid')
+            user = Hospitaluser.query.filter_by(id=user_id).first()
+            if user and user.id == int(user_id):
+                user.authorised = 1
+                db.session.commit()
+                send_email(user)
 
-            send_email(new_user)
+            return redirect('/addHospitalUser')
 
-            flash("Hospital Added", "info")
-            return render_template("addHospitalUser.html")
-
-        return render_template("addHospitalUser.html")
+        return render_template("addHospitalUser.html", unauthorised_users=unauthorised_users)
     else:
         flash("Login and Try Again", "warning")
         return redirect('/admin')
 
-    return render_template("addHospitalUser.html")
+
+@app.route('/add_authorised', methods=['POST'])
+def add_authorised():
+    if(request.method == 'POST'):
+        user_id = request.form.get('user_id')
+        user = Hospitaluser.query.get(user_id)
+        user = Hospitaluser.query.filter_by(id=user_id).first()
+        if user and user.id == user_id:
+            user.authorised = 1
+            db.session.commit()
+    return redirect('/addHospitalUser')
 
 @app.route('/hospitallogin', methods=['POST', 'GET'])
 def hospitallogin():
